@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  // Set your backend URL here so you don't have to type it out every time
-  baseURL: 'https://successpoint.onrender.com/api', 
+  baseURL:  'https://successpoint.onrender.com/api' || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },

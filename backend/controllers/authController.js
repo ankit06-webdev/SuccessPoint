@@ -9,12 +9,12 @@ const registerUser = async (req, res) => {
         email,
         password,
         role,
-        profileDetails, // Base fields
+        profileDetails, 
         enrolledCourses,
         parentDetails,
-        feesDetails,    // Student fields
+        feesDetails,    
         subjectsTaught,
-        experienceInYears // Teacher fields
+        experienceInYears 
     } = req.body;
 
     if (!name || !email || !password || !role) {
@@ -61,28 +61,25 @@ const registerUser = async (req, res) => {
 
         if (role === 'student' && enrolledCourses && enrolledCourses.length > 0) {
             await Course.updateMany(
-                { _id: { $in: enrolledCourses } }, // Find the courses matching these IDs
-                { $addToSet: { enrolledStudents: newUser._id } } // Add the student's ID to them
+                { _id: { $in: enrolledCourses } }, 
+                { $addToSet: { enrolledStudents: newUser._id } } 
             );
         }
 
-        // Generate the token
         const token = jwt.sign(
             { id: newUser._id, role: newUser.role },
             process.env.JWT_SECRET,
             { expiresIn: '5h' }
         );
 
-        // Set cookie options for security
         const cookieOptions = {
-            httpOnly: true, // Prevents cross-site scripting (XSS) attacks
-            secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production
-            sameSite: 'strict', // Prevents cross-site request forgery (CSRF) attacks
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds (matches the JWT expiration)
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000
         };
 
-
-        // Send the response with the cookie
         res.status(201)
             .cookie('token', token, cookieOptions)
             .json({
@@ -98,8 +95,6 @@ const registerUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
-
-
 };
 
 const loginUser = async (req, res) => {
@@ -121,22 +116,20 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        // Generate the token
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
 
-        // Set cookie options for security
         const cookieOptions = {
-            httpOnly: true, // Prevents cross-site scripting (XSS) attacks
-            secure: process.env.NODE_ENV === 'production', // Requires HTTPS in production
-            sameSite: 'strict', // Prevents cross-site request forgery (CSRF) attacks
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds (matches the JWT expiration)
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000
         };
 
-        // Send the response with the cookie
         res.status(200)
             .cookie('token', token, cookieOptions)
             .json({
@@ -154,13 +147,14 @@ const loginUser = async (req, res) => {
     }
 };
 
-
 const logoutUser = (req, res) => {
     try {
+        // Options MUST exactly match how the cookie was created to properly clear it
         const cookieOptions = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            path: '/'
         };
 
         res.clearCookie('token', cookieOptions);
@@ -174,20 +168,21 @@ const logoutUser = (req, res) => {
         });
     }
 }
+
 const getMyProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id)
-            .select('-password') // 🔴 Seedha DB level par password hide kar diya
-            .populate('enrolledCourses', 'title'); // 🔴 NAYA: Course IDs ko unke title ke saath replace kar dega
+            .select('-password') 
+            .populate('enrolledCourses', 'title'); 
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Ab manual delete karne ki zaroorat nahi kyunki select('-password') ne apna kaam kar diya
         res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
 export { registerUser, loginUser, logoutUser, getMyProfile };
