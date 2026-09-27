@@ -16,7 +16,8 @@ connectDB();
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', "https://success-point-theta.vercel.app"];
+const frontendUrl = process.env.FRONTEND_URL || 'https://success-point-theta.vercel.app';
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', frontendUrl];
 
 app.use(cors({
   origin: (origin, callback) => {

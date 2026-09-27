@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL:  'https://successpoint.onrender.com/api',
-  // baseURL:  'https://successpoint.onrender.com/api' || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://successpoint.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -17,7 +16,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       console.warn('Unauthorized! Cookie expired or invalid.');
       
-      window.location.href = '/login'; 
+      // window.location.href = '/login'; 
     }
     return Promise.reject(error);
   }

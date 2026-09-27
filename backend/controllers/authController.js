@@ -3,6 +3,8 @@ import User from '../models/User.js';
 import Course from '../models/Course.js';
 import jwt from 'jsonwebtoken';
 
+const isSecureCookie = process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production';
+
 const registerUser = async (req, res) => {
     const {
         name,
@@ -74,8 +76,8 @@ const registerUser = async (req, res) => {
 
         const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: isSecureCookie,
+            sameSite: isSecureCookie ? 'none' : 'lax',
             path: '/',
             maxAge: 24 * 60 * 60 * 1000
         };
@@ -124,8 +126,8 @@ const loginUser = async (req, res) => {
 
         const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: isSecureCookie,
+            sameSite: isSecureCookie ? 'none' : 'lax',
             path: '/',
             maxAge: 24 * 60 * 60 * 1000
         };
@@ -152,8 +154,8 @@ const logoutUser = (req, res) => {
         // Options MUST exactly match how the cookie was created to properly clear it
         const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: isSecureCookie,
+            sameSite: isSecureCookie ? 'none' : 'lax',
             path: '/'
         };
 
